@@ -11,8 +11,8 @@ RUN pip install -e distributed_processor/python
 RUN pip install -e software
 RUN pip install -e qubitconfig 
 
-#start server
+#prepare gateware and expose port
 RUN cd /qubic-gateware/top/zcu216_8_2; make pre
-#RUN make pre
-RUN cd /qubic-gateware/dsp/cocotb/tutorial_demo; make
-#RUN make
+EXPOSE 9100
+
+CMD cd /qubic-gateware/dsp/cocotb/tutorial_demo; make
