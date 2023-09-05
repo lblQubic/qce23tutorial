@@ -23,10 +23,10 @@ class SimClient:
         self.host = host
         self.port = port
 
-    def run_program(self, asm_prog, sim_time):
+    def run_program(self, asm_prog, sim_time, adc_stream=None, adc_delay=0):
         """
         Run a program in the cocotb/verilator simulator. Resulting DAC 
-        output is stored in self.dacout (numpy array with shape (ndacs, nsamples).
+        output is stored in self.dacout (numpy array with shape (ndacs, nsamples)).
 
         Parameters
         ----------
@@ -35,7 +35,13 @@ class SimClient:
         sim_time : float
             total simulation runtime (not including memory loads) in seconds
         """
-        dumpdict = {'asm_prog': asm_prog, 'nsamples': sim_time//DAC_SAMPLE_DT}
+        dumpdict = {'asm_prog': asm_prog, 
+                    'nsamples': sim_time//DAC_SAMPLE_DT}
+        if adc_stream is not None:
+            assert np.all(adc_stream <= 1)
+            adc_stream *= 2**15
+            dumpdict['adc_stream'] = adc_stream
+
         progdump = pickle.dumps(dumpdict)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect((self.host, self.port))
@@ -48,3 +54,5 @@ class SimClient:
                 data += newdata                
 
             self.dacout = pickle.loads(data)
+            if isinstance(self.dacout, Exception):
+                raise self.dacout
