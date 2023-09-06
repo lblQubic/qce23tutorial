@@ -25,7 +25,7 @@ class SimClient:
         self.host = host
         self.port = port
 
-    def run_program(self, asm_prog, sim_time, adc_stream=None, adc_delay=0):
+    def run_program(self, asm_prog, sim_time, adc_stream=None, adc_delay=0, caputure_demod_chans=[]):
         """
         Run a program in the cocotb/verilator simulator. Resulting DAC 
         output is stored in self.dacout (numpy array with shape (ndacs, nsamples)).
@@ -38,7 +38,8 @@ class SimClient:
             total simulation runtime (not including memory loads) in seconds
         """
         dumpdict = {'asm_prog': asm_prog, 
-                    'nsamples': sim_time//DAC_SAMPLE_DT}
+                    'nsamples': sim_time//DAC_SAMPLE_DT,
+                    'capture_demod_chans': caputure_demod_chans}
         if adc_stream is not None:
             assert np.all(adc_stream <= 1)
             adc_stream *= 2**15
@@ -66,16 +67,16 @@ class SimClient:
                 self.adc_timesteps = np.arange(0, self.dac_out.shape[1]*ADC_SAMPLE_DT, ADC_SAMPLE_DT)
                 self.acc = output_dict['acc']
 
-        def plot_dac_out(self, channel, start_time=0, end_time=None):
-            start_ind = start_time//DAC_SAMPLE_DT
-            if end_time is None
-                end_ind = self.dac_out.shape[1]
-            else:
-                end_ind = end_time//DAC_SAMPLE_DT
+    def plot_dac_out(self, channel, start_time=0, end_time=None):
+        start_ind = int(start_time//DAC_SAMPLE_DT)
+        if end_time is None:
+            end_ind = self.dac_out.shape[1]
+        else:
+            end_ind = int(end_time//DAC_SAMPLE_DT)
 
-            plt.plot(self.dac_timesteps[start_ind:end_ind], self.dac_out[channel, start_ind:end_ind]/(2**15-1))
-            plt.xlabel('time (s)')
-            plt.ylabel('DAC level')
-            plt.title(f'DAC channel {channel}')
-            plt.show()
+        plt.plot(self.dac_timesteps[start_ind:end_ind], self.dac_out[channel, start_ind:end_ind]/(2**15-1))
+        plt.xlabel('time (s)')
+        plt.ylabel('DAC level')
+        plt.title(f'DAC channel {channel}')
+        plt.show()
 
