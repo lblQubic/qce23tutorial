@@ -66,6 +66,7 @@ class SimClient:
                 self.dac_timesteps = np.arange(0, self.dac_out.shape[1]*DAC_SAMPLE_DT, DAC_SAMPLE_DT)
                 self.adc_timesteps = np.arange(0, self.dac_out.shape[1]*ADC_SAMPLE_DT, ADC_SAMPLE_DT)
                 self.acc = output_dict['acc']
+                self.adc_stream = adc_stream
                 if capture_demod:
                     self.rdlo = output_dict['rdlo']
                     self.rdlo_x_adc = output_dict['rdlo_x_adc']
@@ -81,5 +82,35 @@ class SimClient:
         plt.xlabel('time (s)')
         plt.ylabel('DAC level')
         plt.title(f'DAC channel {channel}')
+        plt.show()
+
+    def plot_rdlo(self, channel, start_time, end_time=None):
+        start_ind = int(start_time//ADC_SAMPLE_DT)
+        if end_time is None:
+            end_ind = self.rdlo.shape[1]
+        else:
+            end_ind = int(end_time//ADC_SAMPLE_DT)
+
+        plt.plot(self.adc_timesteps[start_ind:end_ind], self.rdlo[channel, start_ind:end_ind].real/(2**15-1), label='I (real)')
+        plt.plot(self.adc_timesteps[start_ind:end_ind], self.rdlo[channel, start_ind:end_ind].imag/(2**15-1), label='Q (imag)')
+        plt.legend()
+        plt.xlabel('time (s)')
+        plt.ylabel('signal level')
+        plt.title(f'rdlo channel {channel}')
+        plt.show()
+
+    def plot_rdlo_x_adc(self, channel, start_time, end_time=None):
+        start_ind = int(start_time//ADC_SAMPLE_DT)
+        if end_time is None:
+            end_ind = self.rdlo_x_adc.shape[1]
+        else:
+            end_ind = int(end_time//ADC_SAMPLE_DT)
+
+        plt.plot(self.adc_timesteps[start_ind:end_ind], self.rdlo_x_adc[channel, start_ind:end_ind].real/(2**15-1), label='I (real)')
+        plt.plot(self.adc_timesteps[start_ind:end_ind], self.rdlo_x_adc[channel, start_ind:end_ind].imag/(2**15-1), label='Q (imag)')
+        plt.legend()
+        plt.xlabel('time (s)')
+        plt.ylabel('signal level')
+        plt.title(f'rdlo channel {channel}')
         plt.show()
 
