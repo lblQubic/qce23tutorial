@@ -25,7 +25,7 @@ class SimClient:
         self.host = host
         self.port = port
 
-    def run_program(self, asm_prog, sim_time, adc_stream=None, adc_delay=0, caputure_demod_chans=[]):
+    def run_program(self, asm_prog, sim_time, adc_stream=None, adc_delay=0, capture_demod=False):
         """
         Run a program in the cocotb/verilator simulator. Resulting DAC 
         output is stored in self.dacout (numpy array with shape (ndacs, nsamples)).
@@ -39,10 +39,10 @@ class SimClient:
         """
         dumpdict = {'asm_prog': asm_prog, 
                     'nsamples': sim_time//DAC_SAMPLE_DT,
-                    'capture_demod_chans': caputure_demod_chans}
+                    'capture_demod': capture_demod}
         if adc_stream is not None:
             assert np.all(adc_stream <= 1)
-            adc_stream *= 2**15
+            adc_stream *= (2**15 - 1)
             if adc_delay > 0:
                 adc_stream = np.append(np.zeros(int(adc_delay//ADC_SAMPLE_DT)), adc_stream)
             dumpdict['adc_stream'] = adc_stream
@@ -66,6 +66,9 @@ class SimClient:
                 self.dac_timesteps = np.arange(0, self.dac_out.shape[1]*DAC_SAMPLE_DT, DAC_SAMPLE_DT)
                 self.adc_timesteps = np.arange(0, self.dac_out.shape[1]*ADC_SAMPLE_DT, ADC_SAMPLE_DT)
                 self.acc = output_dict['acc']
+                if capture_demod:
+                    self.rdlo = output_dict['rdlo']
+                    self.rdlo_x_adc = output_dict['rdlo_x_adc']
 
     def plot_dac_out(self, channel, start_time=0, end_time=None):
         start_ind = int(start_time//DAC_SAMPLE_DT)
