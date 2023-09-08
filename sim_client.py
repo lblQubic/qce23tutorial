@@ -45,6 +45,7 @@ class SimClient:
             adc_stream *= (2**15 - 1)
             if adc_delay > 0:
                 adc_stream = np.append(np.zeros(int(adc_delay//ADC_SAMPLE_DT)), adc_stream)
+            adc_stream = np.append(adc_stream, np.zeros(4))
             dumpdict['adc_stream'] = adc_stream
 
         progdump = pickle.dumps(dumpdict)
