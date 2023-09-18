@@ -2,5 +2,5 @@
 
 # Function to connect to qubic hardware
 
-echo"Launching jupyter notebook"
+echo "Launching jupyter notebook"
 jupyter notebook
